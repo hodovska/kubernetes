@@ -56,6 +56,11 @@ type Describer interface {
 	Describe(namespace, name string) (output string, err error)
 }
 
+//DescriberSetting holds display options.
+type DescriberSetting struct {
+	ShowEvents bool
+}
+
 // ObjectDescriber is an interface for displaying arbitrary objects with extra
 // information. Use when an object is in hand (on disk, or already retrieved).
 // Implementers may ignore the additional information passed on extra, or use it
