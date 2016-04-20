@@ -31,6 +31,7 @@ import (
 	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/fake"
 	client "k8s.io/kubernetes/pkg/client/unversioned"
 	"k8s.io/kubernetes/pkg/client/unversioned/testclient"
+	"k8s.io/kubernetes/pkg/api/meta"
 )
 
 type describeClient struct {
@@ -49,7 +50,7 @@ func TestDescribePod(t *testing.T) {
 	})
 	c := &describeClient{T: t, Namespace: "foo", Interface: fake}
 	d := PodDescriber{c}
-	out, err := d.Describe("foo", "bar")
+	out, err := d.Describe("foo", "bar", DescriberSetting{ShowEvents:true})
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -67,7 +68,7 @@ func TestDescribeService(t *testing.T) {
 	})
 	c := &describeClient{T: t, Namespace: "foo", Interface: fake}
 	d := ServiceDescriber{c}
-	out, err := d.Describe("foo", "bar")
+	out, err := d.Describe("foo", "bar", DescriberSetting{ShowEvents:true})
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -110,7 +111,7 @@ func TestPodDescribeResultsSorted(t *testing.T) {
 	d := PodDescriber{c}
 
 	// Act
-	out, err := d.Describe("foo", "bar")
+	out, err := d.Describe("foo", "bar", DescriberSetting{ShowEvents:true})
 
 	// Assert
 	if err != nil {
@@ -325,7 +326,8 @@ func TestDescribers(t *testing.T) {
 }
 
 func TestDefaultDescribers(t *testing.T) {
-	out, err := DefaultObjectDescriber.DescribeObject(&api.Pod{ObjectMeta: api.ObjectMeta{Name: "foo"}})
+	out, err := DefaultObjectDescriber.DescribeObject(
+		&api.Pod{ObjectMeta: api.ObjectMeta{Name: "foo"}})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -492,7 +494,7 @@ func TestPersistentVolumeDescriber(t *testing.T) {
 	for name, pv := range tests {
 		fake := testclient.NewSimpleFake(pv)
 		c := PersistentVolumeDescriber{fake}
-		str, err := c.Describe("foo", "bar")
+		str, err := c.Describe("foo", "bar", DescriberSetting{ShowEvents:true})
 		if err != nil {
 			t.Errorf("Unexpected error for test %s: %v", name, err)
 		}
@@ -513,11 +515,65 @@ func TestDescribeDeployment(t *testing.T) {
 		},
 	})
 	d := DeploymentDescriber{fake}
-	out, err := d.Describe("foo", "bar")
+	out, err := d.Describe("foo", "bar", DescriberSetting{ShowEvents:true})
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 	if !strings.Contains(out, "bar") || !strings.Contains(out, "foo") {
 		t.Errorf("unexpected out: %s", out)
+	}
+}
+
+func TestDescribeEvents(t *testing.T,) {
+	c := &describeClient{T: t, Namespace: "foo"}
+	//TODO: add correct key type and other use cases:
+	//daemonsets, endpoint, hpa, ingress,job, node, pod, replicasets, repslication controllers
+	m := map[meta.Object]Describer {
+		&api.Service{}: &ServiceDescriber{c},
+	}
+	events := &api.EventList{
+			Items: []api.Event{
+				{
+					Source:         api.EventSource{Component: "kubelet"},
+					Message:        "Item 1",
+					FirstTimestamp: unversioned.NewTime(time.Date(2014, time.January, 15, 0, 0, 0, 0, time.UTC)),
+					LastTimestamp:  unversioned.NewTime(time.Date(2014, time.January, 15, 0, 0, 0, 0, time.UTC)),
+					Count:          1,
+					Type:           api.EventTypeNormal,
+				},
+			},
+		}
+
+	for obj, d := range m {
+		obj.SetName("bar")
+		obj.SetNamespace("foo")
+		obj.SetSelfLink("some/place/only/we/know")
+		fake := testclient.NewSimpleFake(
+			events,
+			obj,
+		)
+		c.Interface = fake
+
+		out, err := d.Describe("foo", "bar", DescriberSetting{ShowEvents:true})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if !strings.Contains(out, "bar") {
+			t.Errorf("unexpected out: %s", out)
+		}
+		if !strings.Contains(out, "Events:") {
+			t.Errorf("events found when ShowEvents=false: %s", out)
+		}
+
+		out, err = d.Describe("foo", "bar", DescriberSetting{ShowEvents:false})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if !strings.Contains(out, "bar") {
+			t.Errorf("unexpected out: %s", out)
+		}
+		if strings.Contains(out, "Events:") {
+			t.Errorf("events found when ShowEvents=false: %s", out)
+		}
 	}
 }
