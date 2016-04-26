@@ -346,9 +346,21 @@ runTests() {
   kube::test::get_object_jsonpath_assert 'pods/valid-pod' "{$id_field}" 'valid-pod'
   # Describe command should print detailed information
   kube::test::describe_object_assert pods 'valid-pod' "Name:" "Image:" "Node:" "Labels:" "Status:" "Controllers"
+  # Describe command should print events information by default
+  kube::test::describe_object_assert pods 'valid-pod' "No events."
+  # Describe command should not print events information when show_events=false
+  kube::test::describe_object_events_assert pods 'valid-pod' false
+  # Describe command should print events information when show_events=true
+  kube::test::describe_object_events_assert pods 'valid-pod' true
   # Describe command (resource only) should print detailed information
   kube::test::describe_resource_assert pods "Name:" "Image:" "Node:" "Labels:" "Status:" "Controllers"
 
+  # Describe command should print events information by default
+  kube::test::describe_resource_assert pods "No events."
+  # Describe command should not print events information when show_events=false
+  kube::test::describe_resource_events_assert pods false
+  # Describe command should print events information when show_events=true
+  kube::test::describe_resource_events_assert pods true
   ### Validate Export ###
   kube::test::get_object_assert 'pods/valid-pod' "{{.metadata.namespace}} {{.metadata.name}}" '<no value> valid-pod' "--export=true"
 
@@ -1038,8 +1050,20 @@ __EOF__
   kube::test::get_object_assert services "{{range.items}}{{$id_field}}:{{end}}" 'kubernetes:redis-master:'
   # Describe command should print detailed information
   kube::test::describe_object_assert services 'redis-master' "Name:" "Labels:" "Selector:" "IP:" "Port:" "Endpoints:" "Session Affinity:"
+  # Describe command should print events information by default
+  kube::test::describe_object_assert services 'redis-master' "No events."
+  # Describe command should not print events information when show_events=false
+  kube::test::describe_object_events_assert services 'redis-master' false
+  # Describe command should print events information when show_events=true
+  kube::test::describe_object_events_assert services 'redis-master' true
   # Describe command (resource only) should print detailed information
   kube::test::describe_resource_assert services "Name:" "Labels:" "Selector:" "IP:" "Port:" "Endpoints:" "Session Affinity:"
+  # Describe command should print events information by default
+  kube::test::describe_resource_assert services "No events."
+  # Describe command should not print events information when show_events=false
+  kube::test::describe_resource_events_assert services false
+  # Describe command should print events information when show_events=true
+  kube::test::describe_resource_events_assert services true
 
   ### Dump current redis-master service
   output_service=$(kubectl get service redis-master -o json --output-version=v1 "${kube_flags[@]}")
@@ -1145,8 +1169,20 @@ __EOF__
   kube::test::get_object_assert rc "{{range.items}}{{$id_field}}:{{end}}" 'frontend:'
   # Describe command should print detailed information
   kube::test::describe_object_assert rc 'frontend' "Name:" "Image(s):" "Labels:" "Selector:" "Replicas:" "Pods Status:"
+  # Describe command should print events information by default
+  kube::test::describe_object_assert rc 'frontend' "Events:"
+  # Describe command should not print events information when show_events=false
+  kube::test::describe_object_events_assert rc 'frontend' false
+  # Describe command should print events information when show_events=true
+  kube::test::describe_object_events_assert rc 'frontend' true
   # Describe command (resource only) should print detailed information
   kube::test::describe_resource_assert rc "Name:" "Name:" "Image(s):" "Labels:" "Selector:" "Replicas:" "Pods Status:"
+  # Describe command should print events information by default
+  kube::test::describe_resource_assert rc "Events:"
+  # Describe command should not print events information when show_events=false
+  kube::test::describe_resource_events_assert rc false
+  # Describe command should print events information when show_events=true
+  kube::test::describe_resource_events_assert rc true
 
   ### Scale replication controller frontend with current-replicas and replicas
   # Pre-condition: 3 replicas
@@ -1400,8 +1436,20 @@ __EOF__
   kube::test::get_object_assert rs "{{range.items}}{{$id_field}}:{{end}}" 'frontend:'
   # Describe command should print detailed information
   kube::test::describe_object_assert rs 'frontend' "Name:" "Image(s):" "Labels:" "Selector:" "Replicas:" "Pods Status:"
+  # Describe command should print events information by default
+  kube::test::describe_object_assert rs 'frontend' "Events:"
+  # Describe command should not print events information when show_events=false
+  kube::test::describe_object_events_assert rs 'frontend' false
+  # Describe command should print events information when show_events=true
+  kube::test::describe_object_events_assert rs 'frontend' true
   # Describe command (resource only) should print detailed information
   kube::test::describe_resource_assert rs "Name:" "Name:" "Image(s):" "Labels:" "Selector:" "Replicas:" "Pods Status:"
+  # Describe command should print events information by default
+  kube::test::describe_resource_assert rs "Events:"
+  # Describe command should not print events information when show_events=false
+  kube::test::describe_resource_events_assert rs false
+  # Describe command should print events information when show_events=true
+  kube::test::describe_resource_events_assert rs true
 
   ### Scale replica set frontend with current-replicas and replicas
   # Pre-condition: 3 replicas
@@ -1695,8 +1743,20 @@ __EOF__
   kube::test::get_object_assert nodes "{{range.items}}{{$id_field}}:{{end}}" '127.0.0.1:'
 
   kube::test::describe_object_assert nodes "127.0.0.1" "Name:" "Labels:" "CreationTimestamp:" "Conditions:" "Addresses:" "Capacity:" "Pods:"
+  # Describe command should print events information by default
+  kube::test::describe_object_assert nodes "127.0.0.1" "Events:"
+  # Describe command should not print events information when show_events=false
+  kube::test::describe_object_events_assert nodes "127.0.0.1" false
+  # Describe command should print events information when show_events=true
+  kube::test::describe_object_events_assert nodes "127.0.0.1" true
   # Describe command (resource only) should print detailed information
   kube::test::describe_resource_assert nodes "Name:" "Labels:" "CreationTimestamp:" "Conditions:" "Addresses:" "Capacity:" "Pods:"
+  # Describe command should print events information by default
+  kube::test::describe_resource_assert nodes "Events:"
+  # Describe command should not print events information when show_events=false
+  kube::test::describe_resource_events_assert nodes false
+  # Describe command should print events information when show_events=true
+  kube::test::describe_resource_events_assert nodes true
 
   ### kubectl patch update can mark node unschedulable
   # Pre-condition: node is schedulable
@@ -1792,6 +1852,6 @@ __EOF__
   kube::test::clear_all
 }
 
-KUBE_API_VERSIONS="v1,autoscaling/v1,batch/v1,extensions/v1beta1" runTests "v1"
+runTests "v1"
 
 kube::log::status "TEST PASSED"
