@@ -21,6 +21,7 @@ package app
 
 import (
 	"strings"
+	"time"
 
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
@@ -35,6 +36,7 @@ import (
 	genericoptions "k8s.io/kubernetes/pkg/genericapiserver/options"
 	"k8s.io/kubernetes/pkg/registry/cachesize"
 	"k8s.io/kubernetes/pkg/registry/generic"
+	"k8s.io/kubernetes/pkg/controller/framework/informers"
 )
 
 // NewAPIServerCommand creates a *cobra.Command object with default parameters
@@ -119,8 +121,14 @@ func Run(s *genericoptions.ServerRunOptions) error {
 	if err != nil {
 		glog.Errorf("Failed to create clientset: %v", err)
 	}
-	admissionController := admission.NewFromPlugins(client, admissionControlPluginNames, s.AdmissionControlConfigFile)
+	namespaceInformer := informers.CreateSharedNamespaceIndexInformer(client, 5*time.Minute)
+	pluginInit := admission.NewPluginInitializer()
+	pluginInit.SetNamespaceInformer(namespaceInformer)
 
+	admissionController, err := admission.NewFromPlugins(client, admissionControlPluginNames, s.AdmissionControlConfigFile, pluginInit)
+	if err != nil {
+		glog.Errorf("Failed to initialize plugins", err)
+	}
 	genericConfig := genericapiserver.NewConfig(s)
 	// TODO: Move the following to generic api server as well.
 	genericConfig.StorageFactory = storageFactory

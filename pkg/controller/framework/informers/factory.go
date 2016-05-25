@@ -82,3 +82,20 @@ func CreateSharedNodeIndexInformer(client clientset.Interface, resyncPeriod time
 
 	return sharedIndexInformer
 }
+
+func CreateSharedNamespaceIndexInformer(client clientset.Interface, resyncPeriod time.Duration) framework.SharedIndexInformer {
+	sharedIndexInformer := framework.NewSharedIndexInformer(
+		&cache.ListWatch{
+			ListFunc: func(options api.ListOptions) (runtime.Object, error) {
+				return client.Core().Namespaces().List(options)
+			},
+			WatchFunc: func(options api.ListOptions) (watch.Interface, error){
+				return client.Core().Namespaces().Watch(options)
+			},
+		},
+		&api.Namespace{},
+		resyncPeriod,
+		cache.Indexers{})
+
+	return sharedIndexInformer
+}
