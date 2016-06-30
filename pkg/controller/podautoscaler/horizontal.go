@@ -287,7 +287,8 @@ func (a *HorizontalController) reconcileAutoscaler(hpa *autoscaling.HorizontalPo
 		if hpa.Spec.TargetCPUUtilizationPercentage != nil || !cmAnnotationFound {
 			cpuDesiredReplicas, cpuCurrentUtilization, cpuTimestamp, err = a.computeReplicasForCPUUtilization(hpa, scale)
 			if err != nil {
-				a.updateCurrentReplicasInStatus(hpa, currentReplicas)
+				desiredReplicas = currentReplicas
+				a.updateStatus(hpa, currentReplicas, desiredReplicas, nil, cmStatus, false)
 				a.eventRecorder.Event(hpa, api.EventTypeWarning, "FailedComputeReplicas", err.Error())
 				return fmt.Errorf("failed to compute desired number of replicas based on CPU utilization for %s: %v", reference, err)
 			}
@@ -296,7 +297,8 @@ func (a *HorizontalController) reconcileAutoscaler(hpa *autoscaling.HorizontalPo
 		if cmAnnotationFound {
 			cmDesiredReplicas, cmMetric, cmStatus, cmTimestamp, err = a.computeReplicasForCustomMetrics(hpa, scale, cmAnnotation)
 			if err != nil {
-				a.updateCurrentReplicasInStatus(hpa, currentReplicas)
+				desiredReplicas = currentReplicas
+				a.updateStatus(hpa, currentReplicas, desiredReplicas, nil, cmStatus, false)
 				a.eventRecorder.Event(hpa, api.EventTypeWarning, "FailedComputeCMReplicas", err.Error())
 				return fmt.Errorf("failed to compute desired number of replicas based on Custom Metrics for %s: %v", reference, err)
 			}
