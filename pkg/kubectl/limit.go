@@ -24,7 +24,8 @@ import (
 
 type LimitGeneratorV1 struct {
 	Name string
-	//TODO: add flags
+
+	Set string
 }
 
 var _ Generator = &LimitGeneratorV1{}
@@ -46,6 +47,7 @@ func (g LimitGeneratorV1) Generate(genericParams map[string]interface{}) (runtim
 	}
 	delegate := &LimitGeneratorV1{
 		Name: params["name"],
+		Set:  params["set"],
 	}
 	return delegate.StructuredGenerate()
 }
@@ -53,6 +55,7 @@ func (g LimitGeneratorV1) Generate(genericParams map[string]interface{}) (runtim
 func (g LimitGeneratorV1) ParamNames() []GeneratorParam {
 	return GeneratorParam{
 		{"name", true},
+		{"set", true},
 	}
 }
 
@@ -61,9 +64,19 @@ func (g *LimitGeneratorV1) StructuredGenerate() (runtime.Object, error) {
 		return nil, err
 	}
 
+	set, err := parseLimitSet(g.Set)
+	if err != nil {
+		return nil, err
+	}
+
 	limit := &api.LimitRange{}
 	limit.Name = g.Name
+	limit.Spec = set
 	return limit, nil
+}
+
+func parseLimitSet(spec string) ([]api.LimitRangeSpec, error) {
+	return nil, fmt.Errorf("kubectl create limit is not implemented yet")
 }
 
 func (g *LimitGeneratorV1) validate() error {

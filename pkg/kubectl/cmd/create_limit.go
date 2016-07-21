@@ -34,12 +34,12 @@ var (
 	//TODO: add/modify examples/
 	limitExample = dedent.Dedent(`
 		# Create new limit named podmax2cpu for pods to have maximum of 2 CPU’s
-		kubectl create limit podmax2cpu --pod-cpu=max=2`)
+		kubectl create limit new --set=pod.cpu.max=3, pod.cpu.default=2, container.memory.min=200M`)
 )
 
 func NewCmdCreateLimit(f *cmdutil.Factory, cmdOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		//TODO: dopln pouzitie
+		//TODO: add
 		Use:     "limit NAME []",
 		Short:   "Create a limit with the specified name and properties",
 		Long:    limitLong,
@@ -53,7 +53,7 @@ func NewCmdCreateLimit(f *cmdutil.Factory, cmdOut io.Writer) *cobra.Command {
 	cmdutil.AddValidateFlags(cmd)
 	cmdutil.AddPrinterFlags(cmd)
 	cmdutil.AddGeneratorFlags(cmd, cmdutil.LimitV1GeneratorName)
-	//TODO: dopln vlajky
+	cmd.Flags().String("set", "", "A comma-delimited set of type.resource.limit=value pairs that define a limit")
 	return cmd
 }
 
@@ -66,7 +66,10 @@ func CreateLimit(f *cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args 
 	switch generatorName := cmdutil.GetFlagString(cmd, "generator"); generatorName {
 	case cmdutil.LimitV1GeneratorName:
 		//TODO: vlastnosti
-		generator = &kubectl.LimitGeneratorV1{}
+		generator = &kubectl.LimitGeneratorV1{
+			Name: name,
+			Set: cmdutil.GetFlagString(cmd, "set"),
+		}
 	default:
 		return cmdutil.UsageError(cmd, fmt.Sprintf("Generator %s not supported.", generatorName))
 	}
