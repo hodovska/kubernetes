@@ -165,6 +165,7 @@ const (
 	DeploymentV1Beta1GeneratorName              = "deployment/v1beta1"
 	JobV1Beta1GeneratorName                     = "job/v1beta1"
 	JobV1GeneratorName                          = "job/v1"
+	LimitV1GeneratorName                        = "limit/v1"
 	NamespaceV1GeneratorName                    = "namespace/v1"
 	SecretV1GeneratorName                       = "secret/v1"
 	SecretForDockerRegistryV1GeneratorName      = "secret-for-docker-registry/v1"
@@ -189,6 +190,9 @@ func DefaultGenerators(cmdName string) map[string]kubectl.Generator {
 	generators["autoscale"] = map[string]kubectl.Generator{
 		HorizontalPodAutoscalerV1Beta1GeneratorName: kubectl.HorizontalPodAutoscalerV1Beta1{},
 		HorizontalPodAutoscalerV1GeneratorName:      kubectl.HorizontalPodAutoscalerV1{},
+	}
+	generators["limit"] = map[string]kubectl.Generator{
+		LimitV1GeneratorName: kubectl.LimitGeneratorV1{},
 	}
 	generators["namespace"] = map[string]kubectl.Generator{
 		NamespaceV1GeneratorName: kubectl.NamespaceGeneratorV1{},

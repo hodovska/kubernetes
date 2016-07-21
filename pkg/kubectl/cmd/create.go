@@ -83,6 +83,7 @@ func NewCmdCreate(f *cmdutil.Factory, out io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdCreateSecret(f, out))
 	cmd.AddCommand(NewCmdCreateConfigMap(f, out))
 	cmd.AddCommand(NewCmdCreateServiceAccount(f, out))
+	cmd.AddCommand(NewCmdCreateLimit(f, out))
 	return cmd
 }
 
