@@ -46,7 +46,7 @@ func (f *podInformer) Informer() framework.SharedIndexInformer {
 	if exists {
 		return informer
 	}
-	f.informers[informerType] = CreateSharedPodIndexInformer(f.client, f.defaultResync)
+	f.informers[informerType] = NewPodInformer(f.client, f.defaultResync)
 
 	return informer
 }
@@ -81,7 +81,7 @@ func (f *namespaceInformer) Informer() framework.SharedIndexInformer {
 	if exists {
 		return informer
 	}
-	f.informers[informerType] = CreateSharedNamespaceIndexInformer(f.client, f.defaultResync)
+	f.informers[informerType] = NewNamespaceInformer(f.client, f.defaultResync)
 
 	return informer
 }
@@ -116,7 +116,7 @@ func (f *nodeInformer) Informer() framework.SharedIndexInformer {
 	if exists {
 		return informer
 	}
-	f.informers[informerType] = CreateSharedNodeIndexInformer(f.client, f.defaultResync)
+	f.informers[informerType] = NewNodeInformer(f.client, f.defaultResync)
 
 	return informer
 }
@@ -151,7 +151,7 @@ func (f *pvcInformer) Informer() framework.SharedIndexInformer {
 	if exists {
 		return informer
 	}
-	f.informers[informerType] = CreateSharedPVCIndexInformer(f.client, f.defaultResync)
+	f.informers[informerType] = NewPVCInformer(f.client, f.defaultResync)
 
 	return informer
 }
@@ -186,7 +186,7 @@ func (f *pvInformer) Informer() framework.SharedIndexInformer {
 	if exists {
 		return informer
 	}
-	f.informers[informerType] = CreateSharedPVIndexInformer(f.client, f.defaultResync)
+	f.informers[informerType] = NewPVInformer(f.client, f.defaultResync)
 
 	return informer
 }
