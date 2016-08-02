@@ -46,7 +46,11 @@ type sharedInformerFactory struct {
 	client        clientset.Interface
 	lock          sync.Mutex
 	defaultResync time.Duration
-	informers     map[reflect.Type]framework.SharedIndexInformer
+
+	informers        map[reflect.Type]framework.SharedIndexInformer
+	// startedInformers is used for tracking which informers have been started
+	// this allows calling of Start method multiple times
+	startedInformers map[reflect.Type]bool
 }
 
 // NewSharedInformerFactory constructs a new instance of sharedInformerFactory
@@ -63,8 +67,11 @@ func (s *sharedInformerFactory) Start(stopCh <-chan struct{}) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	for _, informer := range s.informers {
-		go informer.Run(stopCh)
+	for informerType, informer := range s.informers {
+		if !s.startedInformers[informerType] {
+			go informer.Run(stopCh)
+			s.startedInformers[informerType] = true
+		}
 	}
 }
 
