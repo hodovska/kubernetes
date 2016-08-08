@@ -36,6 +36,11 @@ import (
 	"k8s.io/kubernetes/pkg/util/strategicpatch"
 )
 
+var immutableFields = []string{
+	//TODO: write all blacklisted values after disscusion
+	"openshift.io/scc",
+}
+
 // AnnotateOptions have the data required to perform the annotate operation
 type AnnotateOptions struct {
 	resources         []string
@@ -284,6 +289,11 @@ func validateAnnotations(removeAnnotations []string, newAnnotations map[string]s
 	}
 	if modifyRemoveBuf.Len() > 0 {
 		return fmt.Errorf("can not both modify and remove the following annotation(s) in the same command: %s", modifyRemoveBuf.String())
+	}
+	for _, immutable := range immutableFields {
+		if _, ok := newAnnotations[immutable]; ok {
+			return fmt.Errorf("can not set or modify immutable field: %s", immutable)
+		}
 	}
 
 	return nil
