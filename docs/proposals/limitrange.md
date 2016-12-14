@@ -15,15 +15,15 @@ Concept has to be discussed and can/will be changed
 +       MemoryBurstable LimitRangeConstraint = "burstable.memory"
 +       StorageRequest LimitRangeConstraint = "requests.storage"
 +)
-+
-
++ 
++ type ResourceConstraintsList map[LimitRangeConstraint]resource.Quantity
 
 type LimitRangeItem struct {
         Type LimitType `json:"type,omitempty"`
         // Max usage constraints on this kind by resource name
         // +optional
 -       Max ResourceList `json:"max,omitempty"`
-+       Max LimitRangeConstraint `json:"max,omitempty"`
++       Max ResourceConstraintsList `json:"max,omitempty"`
         // Min usage constraints on this kind by resource name
         // +optional
 -       Min ResourceList `json:"min,omitempty"`
