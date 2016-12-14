@@ -32,14 +32,12 @@ type LimitRangeItem struct {
         // +optional
 -        Default ResourceList `json:"default,omitempty"`
 +       Default LimitRangeConstraint `json:"min,omitempty"`
-        // DefaultRequest resource requirement request value by resource name.
-+       // deprecated
-        // +optional
-        DefaultRequest ResourceList `json:"defaultRequest,omitempty"`
-        // MaxLimitRequestRatio represents the max burst value for the named resource
-+       //deprecated --use burstable limitrangeConstraints
-        // +optional
-        MaxLimitRequestRatio ResourceList `json:"maxLimitRequestRatio,omitempty"`
+-        // DefaultRequest resource requirement request value by resource name.
+-        // +optional
+-        DefaultRequest ResourceList `json:"defaultRequest,omitempty"`
+-        // MaxLimitRequestRatio represents the max burst value for the named resource
+-        // +optional
+-        MaxLimitRequestRatio ResourceList `json:"maxLimitRequestRatio,omitempty"`
  }
 ```
 
